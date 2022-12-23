@@ -31,3 +31,17 @@ class DataSetAnalysis:
         b64 = base64.b64encode(buffer.getvalue())
         
         return b64
+
+    def get_all_attrs(self):
+        cols = self.df.columns[:-1]
+        return cols
+
+    def get_col_values(self , col):
+
+        if col not in self.df.columns[:-1] and type(self.df[col][0]) != str:
+
+            raise ('please enter the dataset attrs and the attr values must be str, not int neither float!') 
+
+        values = self.df[col].unique()
+
+        return values
