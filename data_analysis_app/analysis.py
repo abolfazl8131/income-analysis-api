@@ -1,4 +1,5 @@
 import pandas as pd
+import io, base64
 
 class DataSetAnalysis:
 
@@ -20,10 +21,13 @@ class DataSetAnalysis:
 
     def bar_plot_by_attr(self, attr):
 
-        if attr not in self.df.columns()[:-1] and self.df[attr][0] != str:
+        if attr not in self.df.columns[:-1] and type(self.df[attr][0]) != str:
             raise ('please enter the dataset attrs and the attr values must be str, not int neither float!') 
                
-
+        
         plt = self.df[attr].value_counts().plot(kind='bar')
-
-        return plt
+        buffer = io.BytesIO()
+        plt.figure.savefig(buffer, format='png')
+        b64 = base64.b64encode(buffer.getvalue())
+        
+        return b64
