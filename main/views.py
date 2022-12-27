@@ -7,6 +7,11 @@ import base64
 import pickle
 from pypmml import Model
 import numpy as np
+
+from rest_framework.views import APIView
+from .serializers import PredictionSerializer
+
+from machine_learning_app.ml_model import TreeClassifier
 # Create your views here.
 
 class DataSetBarPlotByPassingAttributeAPIView(generics.RetrieveAPIView):
@@ -36,13 +41,6 @@ class GetAllColsNameAPIView(generics.RetrieveAPIView):
 
         return Response({'attrs':attrs})
 
-from rest_framework.views import APIView
-from .serializers import PredictionSerializer
-import os
-from sklearn_pmml_model.tree import PMMLTreeClassifier
-
-import pandas as pd
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler,LabelEncoder
 
 class PredictIncome(APIView):
 
@@ -51,10 +49,7 @@ class PredictIncome(APIView):
 
     def post(self, request):
 
-        encoder = LabelEncoder()
-      
-        encoder.classes_ = np.load('main/saved ml/classes.npy',allow_pickle=True) 
-
+       
         data = request.data
         
         serializer = self.serializer_class(data = data)
@@ -67,69 +62,11 @@ class PredictIncome(APIView):
             try:
                 v.append(int(serializer.data.get(k)))
             except:
-                v.append(str(serializer.data.get(k)))
-
-       
-        a_v = np.array(v)
-                
-        a_v = a_v.reshape(1,-1)
-
-        X_encoder = pickle.load(open('main/saved ml/encoder copy.pkl' , 'rb'))
-
-        model = PMMLTreeClassifier(pmml="main/saved ml/dtr copy.pmml")
-
-        df = pd.DataFrame(a_v , columns = ['age',	
-                'workclass',	
-                'fnlwgt',	
-                'education',	
-                'education-num',	
-                'marital-status',	
-                'occupation',	
-                'relationship',	
-                'race',	
-                'sex',	
-                'capital-gain',	
-                'capital-loss',	
-                'hours-per-week',	
-                'native-country',
-                ])
-
-        # df['age'] = pd.to_numeric(df['age'])
-        # df['workclass'] = df['workclass'].astype('|S')
-        # df['fnlwgt'] = pd.to_numeric(df['fnlwgt'])
-        # df['education'] = df['workclass'].astype('|S')
-        # df['education-num'] = pd.to_numeric(df['education-num'])
-        # df['marital-status'] = df['marital-status'].astype('|S')
-        # df['occupation'] = df['occupation'].astype('|S')
-        # df['relationship'] = df['relationship'].astype('|S')
-        # df['race'] = df['race'].astype('|S')
-        # df['sex'] = df['sex'].astype('|S')
-        # df['capital-gain'] = df['capital-gain'].astype('|S')
-
-        for col in df.columns:
-            try:
-                df[col] = pd.to_numeric(df[col])
-            except:
-                
-                df[col] = df[col].astype(str)
+                v.append(serializer.data.get(k))
                
-        
+        prediction = TreeClassifier().predict(v)
 
-       
-
-        for i in df.columns:
-            
-            if type(df[i][0]) == str:
-                
-                df[i] = X_encoder[i].transform(df[i])
-
-        print(df)
-
-        y_pred = model.predict(df)
-        
-        real_y = encoder.inverse_transform(y_pred)
-        return Response({'prediction':real_y})
-
+        return Response({"prediction" : prediction})
 
 
 class GetTotalAnalysis():
