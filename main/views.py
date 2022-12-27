@@ -39,6 +39,10 @@ class GetAllColsNameAPIView(generics.RetrieveAPIView):
 from rest_framework.views import APIView
 from .serializers import PredictionSerializer
 import os
+from sklearn_pmml_model.tree import PMMLTreeClassifier
+
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler,LabelEncoder
 
 class PredictIncome(APIView):
 
@@ -47,46 +51,84 @@ class PredictIncome(APIView):
 
     def post(self, request):
 
-        
-        if os.path.getsize('main/saved ml/Departure_encoder copy.pkl') > 0:
-            with open('main/saved ml/Departure_encoder copy.pkl', 'rb') as f:
-                
-                self.label_encoder = pickle.load(f) 
+        encoder = LabelEncoder()
+      
+        encoder.classes_ = np.load('main/saved ml/classes.npy',allow_pickle=True) 
 
         data = request.data
-
+        
         serializer = self.serializer_class(data = data)
+
         serializer.is_valid()
-       
+     
         v = []
 
-        
         for k in serializer.data.keys():
             try:
                 v.append(int(serializer.data.get(k)))
             except:
-                v.append(serializer.data.get(k))
+                v.append(str(serializer.data.get(k)))
 
-        print(v[1:])
-        
-        a_v = np.array(v[1:])
-        print(a_v)
-        for i in range (1 , len(a_v)):
-            if type(v[i]) == str:
+       
+        a_v = np.array(v)
                 
-                v[i] = self.label_encoder.transform(v[i])
+        a_v = a_v.reshape(1,-1)
+
+        X_encoder = pickle.load(open('main/saved ml/encoder copy.pkl' , 'rb'))
+
+        model = PMMLTreeClassifier(pmml="main/saved ml/dtr copy.pmml")
+
+        df = pd.DataFrame(a_v , columns = ['age',	
+                'workclass',	
+                'fnlwgt',	
+                'education',	
+                'education-num',	
+                'marital-status',	
+                'occupation',	
+                'relationship',	
+                'race',	
+                'sex',	
+                'capital-gain',	
+                'capital-loss',	
+                'hours-per-week',	
+                'native-country',
+                ])
+
+        # df['age'] = pd.to_numeric(df['age'])
+        # df['workclass'] = df['workclass'].astype('|S')
+        # df['fnlwgt'] = pd.to_numeric(df['fnlwgt'])
+        # df['education'] = df['workclass'].astype('|S')
+        # df['education-num'] = pd.to_numeric(df['education-num'])
+        # df['marital-status'] = df['marital-status'].astype('|S')
+        # df['occupation'] = df['occupation'].astype('|S')
+        # df['relationship'] = df['relationship'].astype('|S')
+        # df['race'] = df['race'].astype('|S')
+        # df['sex'] = df['sex'].astype('|S')
+        # df['capital-gain'] = df['capital-gain'].astype('|S')
+
+        for col in df.columns:
+            try:
+                df[col] = pd.to_numeric(df[col])
+            except:
                 
-            v[i] = self.label_encoder.transform(v[i])
+                df[col] = df[col].astype(str)
                
-
         
-        model = Model.fromFile('main/saved ml/dtr.pmml')
 
-        y_pred = model.predict(v)
+       
 
-        y_pred = self.label_encoder.inverse_transform(y_pred)
+        for i in df.columns:
+            
+            if type(df[i][0]) == str:
+                
+                df[i] = X_encoder[i].transform(df[i])
 
-        return Response({'prediction':y_pred})
+        print(df)
+
+        y_pred = model.predict(df)
+        
+        real_y = encoder.inverse_transform(y_pred)
+        return Response({'prediction':real_y})
 
 
 
