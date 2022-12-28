@@ -36,12 +36,14 @@ class DataSetAnalysis:
         cols = self.df.columns[:-1]
         return cols
 
-    def get_col_values(self , col):
+    def get_col_values(self):
 
-        if col not in self.df.columns[:-1] and type(self.df[col][0]) != str:
+        values = []
 
-            raise ('please enter the dataset attrs and the attr values must be str, not int neither float!') 
+        for col in self.df.columns[:-1]:
 
-        values = self.df[col].unique()
+            if type(self.df[col][0]) == str:
+                values.append({col :self.df[col].unique()})
 
         return values
+    

@@ -7,7 +7,6 @@ import base64
 import pickle
 from pypmml import Model
 import numpy as np
-
 from rest_framework.views import APIView
 from .serializers import PredictionSerializer
 
@@ -24,11 +23,12 @@ class DataSetBarPlotByPassingAttributeAPIView(generics.RetrieveAPIView):
 
 class GetAvailableValuesInColsAPIView(generics.RetrieveAPIView):
 
+    
     def get(self, request):
-        col = request.GET.get('col')
+       
         o = DataSetAnalysis('main/adult.data')
       
-        return Response({'attrs': o.get_col_values(col)})
+        return Response({'attrs':o.get_col_values()})
 
        
 
@@ -45,6 +45,7 @@ class GetAllColsNameAPIView(generics.RetrieveAPIView):
 class PredictIncome(APIView):
 
     serializer_class = PredictionSerializer
+
     label_encoder = None
 
     def post(self, request):

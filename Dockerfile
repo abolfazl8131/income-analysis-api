@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir numpy scipy pandas matplotlib django-resized skle
 # set work directory
 RUN mkdir /code
 COPY ./code /code
-WORKDIR /code
+WORKDIR /code 
 # set environment variables
 
 ENV PYTHONDONTWRITEBYTECODE=1
