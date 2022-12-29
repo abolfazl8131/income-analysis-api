@@ -70,5 +70,60 @@ class PredictIncome(APIView):
         return Response({"prediction" : prediction})
 
 
-class GetTotalAnalysis():
-    pass
+class GetDFCorr(generics.RetrieveAPIView):
+
+    def get(self, request):
+        o = DataSetAnalysis('main/adult.data')
+        corr = o.correlation()
+
+        return HttpResponse(corr)
+
+
+class GetQuartileDeviation(generics.RetrieveAPIView):
+
+    def get(self, request):
+        o = DataSetAnalysis('main/adult.data')
+        col = request.GET.get('col')
+        qd = o.quartile_deviation(col)
+
+        return HttpResponse(qd)
+
+
+class GetVariance(generics.RetrieveAPIView):
+
+    def get(self, request):
+        o = DataSetAnalysis('main/adult.data')
+        var = o.variance()
+
+        return HttpResponse(var)
+
+class GetStandardDev(generics.RetrieveAPIView):
+    def get(self, request):
+        o = DataSetAnalysis('main/adult.data')
+        sd = o.standard_deviation()
+
+        return HttpResponse(sd)
+
+
+class GetMean(generics.RetrieveAPIView):
+    def get(self, request):
+        o = DataSetAnalysis('main/adult.data')
+        sd = o.mean()
+
+        return HttpResponse(sd)
+
+
+class GetMode(generics.RetrieveAPIView):
+    def get(self, request):
+        o = DataSetAnalysis('main/adult.data')
+        sd = o.mode()
+
+        return HttpResponse(sd)
+
+
+class GetMedian(generics.RetrieveAPIView):
+    def get(self, request):
+        o = DataSetAnalysis('main/adult.data')
+        sd = o.median()
+
+        return HttpResponse(sd)

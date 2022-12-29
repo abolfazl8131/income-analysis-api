@@ -46,4 +46,26 @@ class DataSetAnalysis:
                 values.append({col :self.df[col].unique()})
 
         return values
+
+    def correlation(self):
+        return self.df.corr().to_html()
+
+    def quartile_deviation(self , col):
+        return pd.DataFrame(self.df[col].quantile([0.25, 0.75], interpolation='nearest')).to_html()
+
+    def variance(self):
+        return pd.DataFrame(self.df.var()).to_html()
+
+    def standard_deviation(self):
+        return pd.DataFrame(self.df.std()).to_html()
+
+    def mode(self):
+        return pd.DataFrame(self.df.mode()).to_html()
+
+    def median(self):
+        return pd.DataFrame(self.df.median()).to_html()
+
+    def mean(self):
+        return pd.DataFrame(self.df.mean()).to_html()
+
     
